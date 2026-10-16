@@ -1,0 +1,86 @@
+name: Prepare MinIO binary release
+'on':
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish after both architectures pass (never overwrites releases)
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: minio-binary-release
+  cancel-in-progress: false
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+          - arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+          cache: false
+      - name: Build and package native binaries and sources
+        env:
+          ARCHITECTURE: ${{ matrix.arch }}
+        run: bash minio/build-release.sh "$ARCHITECTURE" dist
+      - name: Verify checksums and Alpine runtime compatibility
+        env:
+          ARCHITECTURE: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          source minio/releases.env
+          export MINIO_VERSION MC_VERSION
+          (cd dist && for checksum in *.sha256; do sha256sum -c "$checksum"; done)
+          # Execute in the musl-based OS used by the application images.
+          docker run --rm --platform "linux/$ARCHITECTURE" \
+            -e ARCHITECTURE -e MINIO_VERSION -e MC_VERSION \
+            -v "$PWD/dist:/artifacts:ro" alpine:3.22 sh -ec '
+              mkdir /tmp/server /tmp/client
+              tar -xzf "/artifacts/minio-$MINIO_VERSION-linux-$ARCHITECTURE.tar.gz" -C /tmp/server
+              tar -xzf "/artifacts/mc-$MC_VERSION-linux-$ARCHITECTURE.tar.gz" -C /tmp/client
+              /tmp/server/minio --version
+              /tmp/client/mc --version
+            '
+      - name: Verify server and client together
+        env:
+          ARCHITECTURE: ${{ matrix.arch }}
+        run: bash minio/smoke-test.sh dist "$ARCHITECTURE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: minio-${{ matrix.arch }}
+          path: dist/
+          compression-level: 0
+          if-no-files-found: error
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: minio-*
+          merge-multiple: true
+          path: dist
+      - name: Publish only after both architectures pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: bash minio/publish-release.sh dist
