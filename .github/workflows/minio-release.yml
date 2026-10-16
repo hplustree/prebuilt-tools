@@ -67,6 +67,7 @@ jobs:
   publish:
     if: inputs.publish
     needs: build
+    environment: minio-release
     runs-on: ubuntu-24.04
     permissions:
       contents: write

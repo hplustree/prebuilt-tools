@@ -7,6 +7,15 @@ This is the separate public `hplustree/prebuilt-tools` repository. Existing
 production RTK downloads continue using `hplustree/rtk-debian-builds`; nothing
 here renames, replaces, or modifies that repository or its releases.
 
+## Release availability
+
+| Tool | ARM64 / AMD64 | Status |
+|------|---------------|--------|
+| RTK v0.29.0 | Linux Debian Bookworm | [Published](https://github.com/hplustree/prebuilt-tools/releases/tag/v0.29.0) |
+| MinIO server + client | Linux, Alpine-compatible | Pending first build, review, and publication |
+
+MinIO Docker downloads become available only after its release is published.
+
 ## MinIO releases
 
 `minio/releases.env` pins a namespaced bundle tag, exact upstream release tags,
@@ -38,8 +47,24 @@ artifacts in Actions; it creates no GitHub release. The workflow runs native
 version checks, Alpine executable checks, and a server/client bucket upload and
 download round trip before uploading artifacts.
 
-Only a dispatch with `publish: true`, after both architecture jobs succeed,
-can publish. The publisher requires the entire asset matrix and valid checksums,
+Before dispatching with `publish: true`, configure the GitHub environment
+`minio-release` with a **required reviewer** in Settings → Environments.
+The workflow's publish job uses this environment. An environment name alone
+provides no protection: keep the required-reviewer rule enabled.
+
+To prepare a release:
+
+1. Open Actions → Prepare MinIO binary release → Run workflow on `main`.
+2. Select `publish: true` to build both architectures and wait at the review gate.
+3. Review both build jobs, version/Alpine checks, the server/client round trip,
+   artifact checksums, and source/build metadata.
+4. Approve the `minio-release` environment only after that review. Approval
+   starts the publish job; until then no draft or published release is created.
+5. Verify the published release contains the complete ARM64/AMD64 asset matrix.
+
+Only a dispatch with `publish: true`, after both architecture jobs succeed and
+an environment reviewer approves, can publish. The publisher requires the
+entire asset matrix and valid checksums,
 requires a public repository, and refuses any target except
 `hplustree/prebuilt-tools`. It creates a draft, uploads assets, then publishes.
 An existing release is never overwritten; failed uploads remain a draft. Inspect

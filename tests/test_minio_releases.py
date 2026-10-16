@@ -131,6 +131,7 @@ def test_separate_workflow_is_manual_and_requires_both_architectures_before_publ
     assert matrix == [{"arch": "arm64", "runner": "ubuntu-24.04-arm"}, {"arch": "amd64", "runner": "ubuntu-24.04"}]
     assert workflow["jobs"]["publish"]["if"] == "inputs.publish"
     assert workflow["jobs"]["publish"]["needs"] == "build"
+    assert workflow["jobs"]["publish"]["environment"] == "minio-release"
     assert workflow["permissions"] == {"contents": "read"}
     steps = workflow["jobs"]["build"]["steps"]
     assert any("Alpine" in step.get("name", "") for step in steps)
