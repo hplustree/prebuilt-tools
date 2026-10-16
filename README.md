@@ -49,13 +49,24 @@ revision. Never modify the assets of an already published bundle.
 Review the source/package notices and metadata before the first publication.
 Keep corresponding source assets available alongside their binaries.
 
-## Future RTK migration
+## RTK releases
 
-Keep production on `hplustree/rtk-debian-builds` for now. RTK can later use its own
-release namespace here. Copy old assets without rebuilding, compare checksums,
-test the new URL, then explicitly change consumers. Existing RTK releases must
-remain accessible for current deployments and rollbacks. This MinIO workflow
-does not build, upload, or edit RTK releases.
+[RTK v0.29.0](https://github.com/hplustree/prebuilt-tools/releases/tag/v0.29.0)
+contains exact copies of the existing Debian Bookworm binaries for ARM64
+(`aarch64`) and AMD64 (`x86_64`). The original archive filenames and bytes are
+preserved; RTK was not rebuilt or repackaged. Each archive has a `.sha256`
+sidecar, and `SHA256SUMS` lists both hashes. `PROVENANCE.json` records the
+original release URL, asset IDs, sizes, and SHA-256 values. The same metadata
+is recorded in `rtk/v0.29.0.json` and `rtk/v0.29.0-SHA256SUMS` in this repository.
+
+The hashes were checked against GitHub's original asset digests and verified
+again using anonymous downloads from the new release.
+
+The [original RTK release](https://github.com/hplustree/rtk-debian-builds/releases/tag/v0.29.0)
+remains unchanged and accessible. Production consumers still use that original
+repository. Moving a consumer to `prebuilt-tools` is a separate launch change;
+retain the old releases for existing deployments and rollbacks. The MinIO
+workflow does not build, upload, or edit RTK releases.
 
 ## Offline tests
 

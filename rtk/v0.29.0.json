@@ -1,0 +1,26 @@
+{
+  "tool": "rtk",
+  "version": "v0.29.0",
+  "source_repository": "hplustree/rtk-debian-builds",
+  "source_release_url": "https://github.com/hplustree/rtk-debian-builds/releases/tag/v0.29.0",
+  "source_release_id": 386126652,
+  "source_published_at": "2026-09-10T08:53:00Z",
+  "destination_repository": "hplustree/prebuilt-tools",
+  "rebuilt": false,
+  "assets": [
+    {
+      "name": "rtk-v0.29.0-aarch64-linux-bookworm.tar.gz",
+      "size": 2871728,
+      "sha256": "79313cf9ab25c9627c0435aeb6304538794323dc312a3aa2ccb340812092489a",
+      "source_asset_id": 554629872,
+      "source_url": "https://github.com/hplustree/rtk-debian-builds/releases/download/v0.29.0/rtk-v0.29.0-aarch64-linux-bookworm.tar.gz"
+    },
+    {
+      "name": "rtk-v0.29.0-x86_64-linux-bookworm.tar.gz",
+      "size": 3071727,
+      "sha256": "cf7931ea4248f26fa2e0315ad60700e3c0d35f169640f91be2aa9b7da222f34f",
+      "source_asset_id": 554629724,
+      "source_url": "https://github.com/hplustree/rtk-debian-builds/releases/download/v0.29.0/rtk-v0.29.0-x86_64-linux-bookworm.tar.gz"
+    }
+  ]
+}
