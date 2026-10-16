@@ -12,16 +12,17 @@ here renames, replaces, or modifies that repository or its releases.
 | Tool | ARM64 / AMD64 | Status |
 |------|---------------|--------|
 | RTK v0.29.0 | Linux Debian Bookworm | [Published](https://github.com/hplustree/prebuilt-tools/releases/tag/v0.29.0) |
-| MinIO server + client | Linux, Alpine-compatible | [Build and review passed](https://github.com/hplustree/prebuilt-tools/actions/runs/38866210064); publication awaiting approval |
+| MinIO server + client | Linux, Alpine-compatible | [Published and verified](https://github.com/hplustree/prebuilt-tools/releases/tag/minio-2025-09-07-mc-2025-08-13-r1) |
 
-MinIO Docker downloads become available only after its release is published.
+MinIO Docker downloads are publicly available from the published bundle without GitHub credentials.
 
 The first MinIO bundle (`minio-2025-09-07-mc-2025-08-13-r1`) was built from
 `4d164e6` on 2026-10-16. Both native jobs passed checksum, Alpine executable,
 and server/client upload-download checks. Artifact review verified all 24 files,
 the four executable architecture headers, licenses, vendored sources, and pinned
-build metadata. The publish job is waiting at the required-reviewer environment;
-no MinIO draft or release has been created.
+build metadata. After review approval, the workflow published the bundle. All 24
+release assets were downloaded anonymously and their sizes and SHA-256 hashes
+matched the reviewed artifacts. The original production RTK release is unchanged.
 
 ## MinIO releases
 
