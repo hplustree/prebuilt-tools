@@ -1,0 +1,84 @@
+name: Prepare stage-cluster tools release
+
+'on':
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish after both architectures pass (never overwrites releases)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-cluster-tools-release
+  cancel-in-progress: false
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+          - arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download, verify, and package official releases
+        run: bash stage-cluster-tools/build-release.sh "${{ matrix.arch }}" dist
+      - name: Verify archive contents and Alpine executables
+        env:
+          ARCHITECTURE: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          source stage-cluster-tools/releases.env
+          export ARCHITECTURE KUBERNETES_VERSION MINIKUBE_VERSION
+          asset="stage-cluster-tools-k8s-${KUBERNETES_VERSION}-minikube-${MINIKUBE_VERSION}-linux-${ARCHITECTURE}.tar.gz"
+          (cd dist && sha256sum -c "$asset.sha256")
+          docker run --rm --platform "linux/$ARCHITECTURE" \
+            -e ARCHITECTURE -e KUBERNETES_VERSION -e MINIKUBE_VERSION \
+            -v "$PWD/dist:/artifacts:ro" alpine:3.22 sh -ec '
+              root="/tmp/tools/stage-cluster-tools-k8s-${KUBERNETES_VERSION}-minikube-${MINIKUBE_VERSION}-linux-${ARCHITECTURE}"
+              mkdir -p /tmp/tools
+              tar -xzf "/artifacts/stage-cluster-tools-k8s-${KUBERNETES_VERSION}-minikube-${MINIKUBE_VERSION}-linux-${ARCHITECTURE}.tar.gz" -C /tmp/tools
+              "$root/bin/kubectl" version --client --output=yaml
+              "$root/bin/minikube" version --short
+              tar -xzf "$root/preloaded_binaries.tar.gz" -C /tmp/tools
+              "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubelet" --version
+              "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubeadm" version -o short
+            '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage-cluster-tools-${{ matrix.arch }}
+          path: dist/
+          compression-level: 0
+          if-no-files-found: error
+  publish:
+    if: inputs.publish
+    needs: package
+    environment: stage-cluster-tools-release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stage-cluster-tools-*
+          merge-multiple: true
+          path: dist
+      - name: Publish only after both architectures pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: bash stage-cluster-tools/publish-release.sh dist

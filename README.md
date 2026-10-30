@@ -13,6 +13,7 @@ here renames, replaces, or modifies that repository or its releases.
 |------|---------------|--------|
 | RTK v0.29.0 | Linux Debian Bookworm | [Published](https://github.com/hplustree/prebuilt-tools/releases/tag/v0.29.0) |
 | MinIO server + client | Linux, Alpine-compatible | [Published and verified](https://github.com/hplustree/prebuilt-tools/releases/tag/minio-2025-09-07-mc-2025-08-13-r1) |
+| Stage-cluster tools | Kubernetes v1.30.0 + Minikube v1.34.0 | Release workflow prepared; not yet published |
 
 MinIO Docker downloads are publicly available from the published bundle without GitHub credentials.
 
@@ -81,6 +82,21 @@ revision. Never modify the assets of an already published bundle.
 
 Review the source/package notices and metadata before the first publication.
 Keep corresponding source assets available alongside their binaries.
+
+## Stage-cluster tool releases
+
+`stage-cluster-tools/releases.env` pins Kubernetes and Minikube versions. Its
+workflow downloads the official ARM64 and AMD64 release binaries, verifies their
+upstream SHA-256 values, and packages `kubectl`, `minikube`, and the preloaded
+`kubectl`/`kubelet`/`kubeadm` cache consumed by the stage-cluster image. Every
+archive includes `SOURCE.txt` with upstream URLs, licenses, and checksums.
+
+The workflow is dispatch-only. With the default `publish: false`, it prepares
+and verifies artifacts only. Publishing requires both architecture jobs to pass
+and approval of the `stage-cluster-tools-release` GitHub environment. It refuses
+to publish to a different repository and never overwrites an existing release.
+Docker continues to use the official, checksum-verified URLs until the first
+release is reviewed and published; this preparation does not change production.
 
 ## RTK releases
 
