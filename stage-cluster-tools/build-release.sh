@@ -43,7 +43,10 @@ download() {
 
 kubernetes_base="https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${architecture}"
 download "$kubernetes_base/kubectl" "$root/bin/kubectl" "$kubectl_sha256"
-download "https://github.com/kubernetes/minikube/releases/download/v${MINIKUBE_VERSION}/minikube-linux-${architecture}" \
+# GitHub release assets occasionally return transient 404s to hosted runners.
+# Google Storage is Minikube's official mirrored release endpoint and serves
+# the identical checksum-verified artifact.
+download "https://storage.googleapis.com/minikube/releases/v${MINIKUBE_VERSION}/minikube-linux-${architecture}" \
     "$root/bin/minikube" "$minikube_sha256"
 cp "$root/bin/kubectl" "$preloaded/kubectl"
 download "$kubernetes_base/kubelet" "$preloaded/kubelet" "$kubelet_sha256"
@@ -64,7 +67,7 @@ $kubernetes_base/{kubectl,kubelet,kubeadm}
 Source: https://github.com/kubernetes/kubernetes (Apache-2.0)
 
 Upstream Minikube binary:
-https://github.com/kubernetes/minikube/releases/download/v${MINIKUBE_VERSION}/minikube-linux-${architecture}
+https://storage.googleapis.com/minikube/releases/v${MINIKUBE_VERSION}/minikube-linux-${architecture}
 Source: https://github.com/kubernetes/minikube (Apache-2.0)
 
 Checksums verified before packaging:

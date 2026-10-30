@@ -19,6 +19,8 @@ def test_stage_cluster_release_has_immutable_versions_checksums_and_two_architec
     assert "MINIKUBE_VERSION=v1.34.0" in pins
     assert "release/stable.txt" not in source
     assert "releases/latest" not in source
+    assert "storage.googleapis.com/minikube/releases" in source
+    assert "github.com/kubernetes/minikube/releases/download" not in source
     assert source.count("sha256sum -c -") == 1
     assert 'tar -C "$preloaded_root" -czf "$root/preloaded_binaries.tar.gz" .' in source
     for checksum in (
