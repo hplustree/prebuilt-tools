@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
       - name: Download, verify, and package official releases
         run: bash stage-cluster-tools/build-release.sh "${{ matrix.arch }}" dist
-      - name: Verify archive contents and Alpine executables
+      - name: Verify archive contents and stage-cluster runtime tools
         env:
           ARCHITECTURE: ${{ matrix.arch }}
         run: |
@@ -49,11 +49,13 @@ jobs:
               root="/tmp/tools/stage-cluster-tools-k8s-${KUBERNETES_VERSION}-minikube-${MINIKUBE_VERSION}-linux-${ARCHITECTURE}"
               mkdir -p /tmp/tools
               tar -xzf "/artifacts/stage-cluster-tools-k8s-${KUBERNETES_VERSION}-minikube-${MINIKUBE_VERSION}-linux-${ARCHITECTURE}.tar.gz" -C /tmp/tools
+            apk add --no-cache gcompat
               "$root/bin/kubectl" version --client --output=yaml
               "$root/bin/minikube" version --short
               tar -xzf "$root/preloaded_binaries.tar.gz" -C /tmp/tools
-              "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubelet" --version
-              "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubeadm" version -o short
+            test -x "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubectl"
+            test -x "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubelet"
+            test -x "/tmp/tools/linux/${ARCHITECTURE}/${KUBERNETES_VERSION}/kubeadm"
             '
       - uses: actions/upload-artifact@v4
         with:

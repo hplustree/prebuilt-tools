@@ -38,6 +38,7 @@ def test_stage_cluster_release_has_immutable_versions_checksums_and_two_architec
     for command in ("kubectl", "minikube", "kubelet", "kubeadm"):
         assert command in verification
     assert "alpine:3.22" in verification
+    assert "apk add --no-cache gcompat" in verification
     assert 'tar -xzf "$root/preloaded_binaries.tar.gz"' in verification
 
 
