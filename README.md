@@ -13,7 +13,7 @@ here renames, replaces, or modifies that repository or its releases.
 |------|---------------|--------|
 | RTK v0.29.0 | Linux Debian Bookworm | [Published](https://github.com/hplustree/prebuilt-tools/releases/tag/v0.29.0) |
 | MinIO server + client | Linux, Alpine-compatible | [Published and verified](https://github.com/hplustree/prebuilt-tools/releases/tag/minio-2025-09-07-mc-2025-08-13-r1) |
-| Stage-cluster tools | Kubernetes v1.30.0 + Minikube v1.34.0 | Release workflow prepared; not yet published |
+| Stage-cluster tools | Kubernetes v1.30.0 + Minikube v1.34.0 | [Published](https://github.com/hplustree/prebuilt-tools/releases/tag/stage-cluster-tools-k8s-v1.30.0-minikube-v1.34.0-r1) |
 
 MinIO Docker downloads are publicly available from the published bundle without GitHub credentials.
 
@@ -95,8 +95,13 @@ The workflow is dispatch-only. With the default `publish: false`, it prepares
 and verifies artifacts only. Publishing requires both architecture jobs to pass
 and approval of the `stage-cluster-tools-release` GitHub environment. It refuses
 to publish to a different repository and never overwrites an existing release.
-Docker continues to use the official, checksum-verified URLs until the first
-release is reviewed and published; this preparation does not change production.
+
+The first published bundle is
+[`stage-cluster-tools-k8s-v1.30.0-minikube-v1.34.0-r1`](https://github.com/hplustree/prebuilt-tools/releases/tag/stage-cluster-tools-k8s-v1.30.0-minikube-v1.34.0-r1).
+It contains architecture-specific archives and SHA-256 sidecars. Consumers must
+pin both this release tag and the archive digest; they must not follow a mutable
+latest pointer. Moving a consumer to this release is a separate source change
+and does not affect production until that consumer is built and deployed.
 
 ## RTK releases
 
